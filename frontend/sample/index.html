@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>CamFinder — Find the Best Deals</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <link rel="stylesheet" href="styles.css">
+    </head>
+    <body>
+        <!-- Hero Section -->
+        <header class="hero">
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <div class="hero-label">
+                    <span class="accent-line"></span>
+                    <span class="label-text">Market Research · April 2026</span>
+                </div>
+                <h1 class="hero-title">
+                    CamFinder<br>
+                    <span class="accent-text">Market Finder</span>
+                </h1>
+                <p class="hero-description">
+                A comprehensive survey of all available Leica M3 listings across eBay, KEH, MPB, Camera West, GearFocus, Classic Connection, and private sellers — ranked by value and quality.
+                </p>
+                <div class="hero-stats">
+                    <div class="stat">
+                        <strong>23</strong> listings
+                    </div>
+                    <div class="stat">
+                        <strong>9</strong> platforms
+                    </div>
+                    <div class="stat">
+                        <strong>$845</strong> lowest price
+                    </div>
+                    <div class="stat">
+                        <strong>17</strong> recommended
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="sticky-nav">
+            <div class="nav-container">
+                <button class="nav-tab active" data-section="listings">
+                    All Listings <span class="listing-count">(23)</span>
+                </button>
+                <button class="nav-tab" data-section="charts">
+                    Price Analysis
+                </button>
+                <button class="nav-tab" data-section="guide">
+                    Buyer's Guide
+                </button>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="container">
+            <!-- Listings Section -->
+            <section id="listings" class="section active">
+                <div class="listings-wrapper">
+                    <!-- Sidebar Filters -->
+                    <aside class="filters-sidebar">
+                        <div class="filters-sticky">
+                            <div class="filters-header">
+                                <h2>Filters</h2>
+                                <button class="clear-btn" id="clearFilters" style="display: none;">
+                                    <i class="fas fa-times"></i> Clear all
+                                </button>
+                            </div>
+
+                            <!-- Price Range -->
+                            <div class="filter-group">
+                                <label class="filter-label">Price Range</label>
+                                <div class="price-inputs">
+                                    <input type="number" id="priceMin" min="0" max="5000" value="0" placeholder="Min">
+                                    <span>—</span>
+                                    <input type="number" id="priceMax" min="0" max="5000" value="5000" placeholder="Max">
+                                </div>
+                                <input type="range" id="priceSlider" min="0" max="5000" value="5000" class="slider">
+                                <div class="price-display">
+                                    <span id="priceMinDisplay">$0</span> — <span id="priceMaxDisplay">$5,000</span>
+                                </div>
+                            </div>
+
+                            <div class="filter-divider"></div>
+
+                            <!-- Sort -->
+                            <div class="filter-group">
+                                <label class="filter-label">Sort By</label>
+                                <div class="sort-options">
+                                    <label class="sort-option">
+                                        <input type="radio" name="sort" value="price_asc" checked>
+                                        <span>Price: Low to High</span>
+                                    </label>
+                                    <label class="sort-option">
+                                        <input type="radio" name="sort" value="price_desc">
+                                        <span>Price: High to Low</span>
+                                    </label>
+                                    <label class="sort-option">
+                                        <input type="radio" name="sort" value="value">
+                                        <span>Best Value Score</span>
+                                    </label>
+                                    <label class="sort-option">
+                                        <input type="radio" name="sort" value="quality">
+                                        <span>Best Quality Score</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="filter-divider"></div>
+
+                            <!-- Quick Filters -->
+                            <div class="filter-group">
+                                <label class="filter-label">Quick Filters</label>
+                                <label class="checkbox-option">
+                                    <input type="checkbox" id="recommendedOnly">
+                                    <span>Recommended only</span>
+                                </label>
+                                <label class="checkbox-option">
+                                    <input type="checkbox" id="claOnly">
+                                    <span>CLA'd cameras only</span>
+                                </label>
+                            </div>
+
+                            <div class="filter-divider"></div>
+
+                            <!-- Platform Filter -->
+                            <div class="filter-group">
+                                <label class="filter-label">Platform</label>
+                                <div id="platformFilters"></div>
+                            </div>
+
+                            <div class="filter-divider"></div>
+
+                            <!-- Variant Filter -->
+                            <div class="filter-group">
+                                <label class="filter-label">Variant</label>
+                                <div id="variantFilters"></div>
+                            </div>
+                        </div>
+                    </aside>
+
+                    <!-- Listings Grid -->
+                    <div class="listings-main">
+                        <div class="results-header">
+                            <p class="results-count">Showing <strong id="filteredCount">23</strong> of 23 listings</p>
+                        </div>
+                        <div id="listingsGrid" class="listings-grid"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Charts Section -->
+            <section id="charts" class="section">
+                <div class="charts-container">
+                    <!-- Summary Stats -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <p class="stat-label">Lowest Price</p>
+                            <p class="stat-value">$845</p>
+                            <p class="stat-sub">eBay DS (needs CLA)</p>
+                        </div>
+                        <div class="stat-card">
+                            <p class="stat-label">Average Price</p>
+                            <p class="stat-value" id="avgPrice">$1,540</p>
+                            <p class="stat-sub">All listings</p>
+                        </div>
+                        <div class="stat-card">
+                            <p class="stat-label">Median Price</p>
+                            <p class="stat-value" id="medianPrice">$1,650</p>
+                            <p class="stat-sub">Body only</p>
+                        </div>
+                        <div class="stat-card">
+                            <p class="stat-label">Best Value</p>
+                            <p class="stat-value">$1,129</p>
+                            <p class="stat-sub">eBay (281966serg)</p>
+                        </div>
+                    </div>
+
+                    <!-- Platform Comparison Table -->
+                    <div class="chart-card">
+                        <h2>Platform Comparison</h2>
+                        <div class="table-wrapper">
+                            <table class="comparison-table">
+                                <thead>
+                                    <tr>
+                                        <th>Platform</th>
+                                        <th>Type</th>
+                                        <th>Warranty</th>
+                                        <th>Returns</th>
+                                        <th>Listings</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="platformTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Price Range by Platform -->
+                    <div class="chart-card">
+                        <h2>Price Range by Platform</h2>
+                        <div id="platformChart" class="simple-chart"></div>
+                    </div>
+
+                    <!-- Price by Variant -->
+                    <div class="chart-card">
+                        <h2>Price by Variant</h2>
+                        <div id="variantChart" class="simple-chart"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Buyer's Guide Section -->
+            <section id="guide" class="section">
+                <div class="guide-container">
+                    <!-- About the M3 -->
+                    <div class="guide-section">
+                        <div class="section-header">
+                            <span class="section-number">01</span>
+                            <h2>About the Leica M3</h2>
+                        </div>
+                        <div class="section-divider"></div>
+                        <p>The Leica M3, produced from 1954 to 1966, is widely regarded as one of the finest 35mm rangefinder cameras ever made. With over 220,000 units produced, it remains highly sought after by photographers and collectors alike. Its precision-machined brass body, bright 0.91× viewfinder, and reliable cloth focal-plane shutter have kept it in active use for over 70 years.</p>
+                        <p>Two primary variants exist: the <strong>Double Stroke (DS)</strong>, produced from 1954–1958, which requires two strokes of the film advance lever to advance one frame; and the <strong>Single Stroke (SS)</strong>, produced from 1958–1966, which advances in a single motion. Both are mechanically equivalent — the DS is generally less expensive and equally reliable.</p>
+                    </div>
+
+                    <!-- Buying Tips -->
+                    <div class="guide-section">
+                        <div class="section-header">
+                            <span class="section-number">02</span>
+                            <h2>Buying Tips</h2>
+                        </div>
+                        <div class="section-divider"></div>
+                        <div id="buyingTips" class="tips-list"></div>
+                    </div>
+
+                    <!-- Red Flags -->
+                    <div class="guide-section">
+                        <div class="section-header">
+                            <span class="section-number">03</span>
+                            <h2>Red Flags to Avoid</h2>
+                        </div>
+                        <div class="section-divider"></div>
+                        <div id="redFlags" class="tips-list"></div>
+                    </div>
+
+                    <!-- Price Expectations -->
+                    <div class="guide-section">
+                        <div class="section-header">
+                            <span class="section-number">04</span>
+                            <h2>Price Expectations</h2>
+                        </div>
+                        <div class="section-divider"></div>
+                        <div class="price-tiers">
+                            <div class="tier-card">
+                                <p class="tier-price">$845 – $1,200</p>
+                                <p class="tier-label">Budget Range</p>
+                                <p class="tier-desc">Needs CLA or has cosmetic wear. Functional but expect to spend $150–300 on service.</p>
+                            </div>
+                            <div class="tier-card">
+                                <p class="tier-price">$1,200 – $1,600</p>
+                                <p class="tier-label">Sweet Spot</p>
+                                <p class="tier-desc">Good to Very Good condition. Working cameras with minor wear. Best value range.</p>
+                            </div>
+                            <div class="tier-card">
+                                <p class="tier-price">$1,600 – $2,200</p>
+                                <p class="tier-label">Premium Range</p>
+                                <p class="tier-desc">Excellent condition. Recently serviced or CLA'd. Ready to shoot immediately.</p>
+                            </div>
+                            <div class="tier-card">
+                                <p class="tier-price">$2,200+</p>
+                                <p class="tier-label">Collector Range</p>
+                                <p class="tier-desc">Near mint, rare variants, or with original accessories. Investment-grade examples.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Trusted Resources -->
+                    <div class="guide-section">
+                        <div class="section-header">
+                            <span class="section-number">05</span>
+                            <h2>Trusted Resources</h2>
+                        </div>
+                        <div class="section-divider"></div>
+                        <div class="resources-grid" id="resources"></div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <div>
+                    <p class="footer-title">Leica M3 Market Finder</p>
+                    <p class="footer-desc">Research compiled April 16, 2026. Prices are subject to change. Always verify listings directly with sellers.</p>
+                </div>
+                <div class="footer-stats">
+                    <i class="fas fa-chart-line"></i>
+                    <p><strong>23</strong> listings · <strong>9</strong> platforms surveyed</p>
+                </div>
+            </div>
+        </footer>
+
+        <script src="data.js"></script>
+        <script src="script.js"></script>
+    </body>
+</html>

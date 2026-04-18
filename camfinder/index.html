@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CamFinder — Leica M3 Listings</title>
+  <style>
+    /* ── Reset & Base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f8f9fa;
+      --surface: #ffffff;
+      --surface-alt: #f1f3f5;
+      --border: #e9ecef;
+      --accent: #0066cc;
+      --accent-light: #e7f0ff;
+      --accent-hover: #0052a3;
+      --text: #1a1a1a;
+      --text-muted: #6c757d;
+      --text-light: #adb5bd;
+      --success: #28a745;
+      --warning: #ffc107;
+      --danger: #dc3545;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+      --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* ── Header ── */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow-sm);
+    }
+    .header-inner {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      gap: 16px;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--accent) 0%, #0052a3 100%);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-sm);
+    }
+    .logo-icon svg { width: 22px; height: 22px; fill: white; }
+    .logo-text {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+    .logo-text span { color: var(--accent); }
+    .header-count {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-weight: 500;
+    }
+
+    /* ── Main Layout ── */
+    .main {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 32px 24px 60px;
+    }
+
+    /* ── Stats Grid ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      text-align: center;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.2s ease;
+    }
+    .stat-card:hover {
+      border-color: var(--accent);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+    .stat-value {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 600;
+    }
+
+    /* ── Controls Section ── */
+    .controls-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 28px;
+      box-shadow: var(--shadow-sm);
+    }
+    .controls-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 16px;
+      display: block;
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .search-wrap {
+      position: relative;
+      flex: 1 1 260px;
+      min-width: 200px;
+    }
+    .search-wrap svg {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 18px;
+      height: 18px;
+      fill: var(--text-muted);
+      pointer-events: none;
+    }
+    .search-wrap input {
+      width: 100%;
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 0.95rem;
+      padding: 10px 12px 10px 40px;
+      outline: none;
+      transition: all 0.2s ease;
+      font-family: var(--font);
+    }
+    .search-wrap input:focus {
+      border-color: var(--accent);
+      background: var(--surface);
+      box-shadow: 0 0 0 3px var(--accent-light);
+    }
+    .search-wrap input::placeholder { color: var(--text-light); }
+
+    select {
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 0.95rem;
+      padding: 10px 12px;
+      outline: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: var(--font);
+      font-weight: 500;
+    }
+    select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-light);
+    }
+
+    .price-range {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .price-range label { font-size: 0.85rem; color: var(--text-muted); font-weight: 500; }
+    .price-range input[type="number"] {
+      width: 100px;
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 0.95rem;
+      padding: 10px 10px;
+      outline: none;
+      transition: all 0.2s ease;
+      font-family: var(--font);
+    }
+    .price-range input[type="number"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-light);
+    }
+
+    .btn-reset {
+      background: transparent;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 10px 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: var(--font);
+    }
+    .btn-reset:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-light);
+    }
+
+    /* ── Platform Pills ── */
+    .platform-pills {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin: 14px 0 0 0;
+    }
+    .pill {
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      padding: 7px 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-weight: 500;
+    }
+    .pill:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-light);
+    }
+    .pill.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+
+    /* ── Sort & Results Row ── */
+    .sort-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .results-info {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    .results-info strong { color: var(--text); font-weight: 700; }
+    .sort-btns {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .sort-btn {
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 7px 13px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-family: var(--font);
+    }
+    .sort-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-light);
+    }
+    .sort-btn.active {
+      border-color: var(--accent);
+      color: white;
+      background: var(--accent);
+    }
+    .sort-btn .arrow { font-size: 0.75rem; }
+
+    /* ── Grid ── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 20px;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: all 0.2s ease;
+      position: relative;
+      box-shadow: var(--shadow-sm);
+    }
+    .card:hover {
+      border-color: var(--accent);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-4px);
+    }
+    .card.deal-badge::before {
+      content: '⭐ Best Deal';
+      position: absolute;
+      top: -1px;
+      right: 16px;
+      background: linear-gradient(135deg, #ff6b6b 0%, #ff5252 100%);
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+      letter-spacing: 0.04em;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .card-name {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.4;
+      flex: 1;
+    }
+    .card-price {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--accent);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .card-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .badge {
+      font-size: 0.75rem;
+      padding: 5px 11px;
+      border-radius: 6px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      display: inline-block;
+    }
+    .badge-platform {
+      background: var(--accent-light);
+      color: var(--accent);
+      border: 1px solid rgba(0, 102, 204, 0.2);
+    }
+    .badge-location {
+      background: #f0f0f0;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+
+    .card-condition {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      background: var(--surface-alt);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      line-height: 1.5;
+      border-left: 3px solid var(--accent);
+    }
+    .condition-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: auto;
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
+    }
+    .quality-dot {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    .dot-green { background: var(--success); box-shadow: 0 0 8px rgba(40, 167, 69, 0.4); }
+    .dot-yellow { background: var(--warning); box-shadow: 0 0 8px rgba(255, 193, 7, 0.4); }
+    .dot-red { background: var(--danger); box-shadow: 0 0 8px rgba(220, 53, 69, 0.4); }
+
+    .btn-view {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--accent);
+      color: white;
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      transition: all 0.2s ease;
+      letter-spacing: 0.02em;
+      border: none;
+      cursor: pointer;
+      font-family: var(--font);
+    }
+    .btn-view:hover {
+      background: var(--accent-hover);
+      transform: translateX(2px);
+      box-shadow: var(--shadow-md);
+    }
+    .btn-view svg { width: 13px; height: 13px; fill: white; }
+
+    /* ── Empty State ── */
+    .empty {
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--text-muted);
+      grid-column: 1 / -1;
+    }
+    .empty svg { width: 56px; height: 56px; fill: var(--border); margin-bottom: 16px; opacity: 0.5; }
+    .empty p { font-size: 1rem; }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 0.8rem;
+      color: var(--text-light);
+      border-top: 1px solid var(--border);
+      margin-top: 48px;
+      background: var(--surface-alt);
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .header-inner { flex-wrap: wrap; }
+      .main { padding: 20px 16px 40px; }
+      .grid { grid-template-columns: 1fr; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .controls { flex-direction: column; align-items: stretch; }
+      .search-wrap { flex: 1 1 100%; }
+      .sort-row { flex-direction: column; align-items: flex-start; }
+      .sort-btns { width: 100%; }
+    }
+
+    @media (max-width: 480px) {
+      .stats-grid { grid-template-columns: 1fr; }
+      .card-top { flex-direction: column; }
+      .card-price { font-size: 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header>
+  <div class="header-inner">
+    <a class="logo" href="#">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+      </div>
+      <span class="logo-text">Cam<span>Finder</span></span>
+    </a>
+    <span class="header-count" id="headerCount">43 listings</span>
+  </div>
+</header>
+
+<!-- ── MAIN ── -->
+<div class="main">
+
+  <!-- Stats Grid -->
+  <div class="stats-grid" id="statsGrid"></div>
+
+  <!-- Controls Section -->
+  <div class="controls-section">
+    <label class="controls-title">Search & Filter</label>
+    <div class="controls">
+      <div class="search-wrap">
+        <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+        <input type="text" id="searchInput" placeholder="Search listings…" />
+      </div>
+
+      <div class="price-range">
+        <label>Price:</label>
+        <input type="number" id="minPrice" placeholder="Min" min="0" step="50" />
+        <span style="color:var(--text-muted)">–</span>
+        <input type="number" id="maxPrice" placeholder="Max" min="0" step="50" />
+      </div>
+
+      <button class="btn-reset" id="resetBtn">Reset All</button>
+    </div>
+
+    <div class="platform-pills" id="platformPills"></div>
+  </div>
+
+  <!-- Sort Row -->
+  <div class="sort-row">
+    <span class="results-info" id="resultsInfo"></span>
+    <div class="sort-btns">
+      <button class="sort-btn active" data-sort="price-asc">💰 Price Low–High</button>
+      <button class="sort-btn" data-sort="price-desc">💰 Price High–Low</button>
+      <button class="sort-btn" data-sort="name-asc">📝 Name A–Z</button>
+    </div>
+  </div>
+
+  <!-- Grid -->
+  <div class="grid" id="listingsGrid"></div>
+
+</div>
+
+<footer>
+  CamFinder © 2026 — Leica M3 Listings Aggregator &nbsp;|&nbsp; Data from eBay, Facebook Marketplace, KEH, MPB, Alpine Camera, UPP &nbsp;|&nbsp; <a href="#" style="color:var(--accent);text-decoration:none">Learn more</a>
+</footer>
+
+<script>
+// ── DATA ──
+const LISTINGS = [
+  { name: "Original Leitz Leica Camera Double Stroke M3 Body S#: 775xxx in Excellent Cond.", price: 1195.95, location: "San Leandro, CA", platform: "eBay", condition: "Cosmetic wear, frame a little dim, Original \"L\" seal", link: "https://ebay.us/m/HAx1Zk" },
+  { name: "Leica M3 DS Double Stroke Rangefinder Camera Body Chrome #783134", price: 1129.00, location: "Arcadia, CA", platform: "eBay", condition: "Good working condition but lots of wear.", link: "https://ebay.us/m/8ER74R" },
+  { name: "Leica M3 Double Stroke Rangefinder 35mm Film Camera. 1955. Case. CLA'D. AS-IS!", price: 1195.00, location: "Solon, OH", platform: "eBay", condition: "CLA'd in 2025, minimal cosmetic wear", link: "https://ebay.us/m/H0rQ2a" },
+  { name: "Leica M3 DS Double Stroke Rangefinder 35mm Film Camera", price: 1375.00, location: "Lansdale, PA", platform: "eBay", condition: "Good cosmetic with some wear. Needs CLA, inaccurate shutter", link: "https://ebay.us/m/CXIu0e" },
+  { name: "Leica Leitz M3 35mm Rangefinder Film Camera Body, Single Stroke SS, M3", price: 1395.29, location: "Gilford, NH", platform: "eBay", condition: "Cosmetic wear, shutter gets stuck", link: "https://ebay.us/m/V5NNf7" },
+  { name: "Mint LEICA M3 Single Stroke SS 35mm Film Camera Body #11228813", price: 1500.00, location: "Playa del Rey, CA", platform: "eBay", condition: "Some minor marks on top plate", link: "https://ebay.us/m/PGRz7u" },
+  { name: "Leica M3 Single Stroke 35mm Rangefinder Camera Body *USED*", price: 1549.00, location: "Nashville, TN", platform: "eBay", condition: "Minor cosmetic wear", link: "https://ebay.us/m/WnysZV" },
+  { name: "Leica M3 DS Double Stroke Rangefinder 35mm Camera. 1955. Case. CLA'D in 2024.", price: 1545.00, location: "Solon, OH", platform: "eBay", condition: "Shutter good, minor marks on top/bottom plate", link: "https://ebay.us/m/QUgymM" },
+  { name: "Leica M3 Single Stroke 35mm Rangefinder Film Camera", price: 1599.00, location: "Battle Creek, MI", platform: "eBay", condition: "Shutter needs CLA", link: "https://ebay.us/m/sHXlxH" },
+  { name: "Leica M3 35mm Rangefinder Film Camera Body Only", price: 1700.00, location: "Woodside, NY", platform: "eBay", condition: "Recently CLA'd, minor scratches on top/bottom plate", link: "https://ebay.us/m/TXjGWe" },
+  { name: "Leica M3 DS 35mm Rangefinder FILM camera body. 1955. Case & Cap. Cla'd in 2023.", price: 1695.00, location: "Solon, OH", platform: "eBay", condition: "Good working order, good cosmetics", link: "https://ebay.us/m/wKRVFy" },
+  { name: "Leica M3 SS Single Stroke Rangefinder 35mm Film Camera", price: 1699.00, location: "Lansdale, PA", platform: "eBay", condition: "Very good condition, accurate shutter, rangefinder accurate", link: "https://ebay.us/m/g4s1pM" },
+  { name: "Leica M3 35mm Rangefinder With Summicron 50mm F2 Lens", price: 1735.00, location: "Janesville, WI", platform: "eBay", condition: "See listing", link: "https://ebay.us/m/W4CibL" },
+  { name: "Leica M3 Single Stroke vintage 35mm Film Rangefinder Camera. Cap. Manual", price: 1745.00, location: "Solon, OH", platform: "eBay", condition: "Great condition with everything working", link: "https://ebay.us/m/3ch9dL" },
+  { name: "Leica Camera M3 Body S#: 9982XX E. Leitz Canada (ELC) w/Manual, Box", price: 1895.95, location: "San Leandro, CA", platform: "eBay", condition: "Clean and shutters are working", link: "https://ebay.us/m/LgUXSy" },
+  { name: "Leica M3 35mm Rangefinder Film Camera Body Only", price: 2000.00, location: "Folsom, CA", platform: "eBay", condition: "See listing", link: "https://ebay.us/m/hUAwZg" },
+  { name: "[RARE] Near Latest 1966 Leica M3 with L seal, Service Recommended", price: 1999.00, location: "Vestal, NY", platform: "eBay", condition: "L seal on. Needs service, good cosmetics", link: "https://ebay.us/m/uVB80D" },
+  { name: "Leica M3 Single Stroke 35mm Film Rangefinder camera. Case. Cap. CLA'd in 2026!", price: 1995.00, location: "Solon, OH", platform: "eBay", condition: "Good frame lines, good cosmetics and functionality", link: "https://ebay.us/m/HUkfrZ" },
+  { name: "Leica M3 with Rapid Load Kit 14260", price: 1499.95, location: "Des Plaines, IL", platform: "Alpine Camera", condition: "Working properly, missing leather in the back", link: "https://alpinecamerausa.com/products/leica-m3-single-stroke-converted-w-rapid-load-kit-14260" },
+  { name: "Leica M3 DS Double Stroke Rangefinder Camera Body Chrome *Read", price: 1004.70, location: "Indianapolis, IN", platform: "UPP", condition: "See listing", link: "https://usedphotopro.com/leica-m3-ds-double-stroke-rangefinder-camera-body-chrome-read-ulm-02-9600-6-833696-03d31ae1" },
+  { name: "Leica M3 DS Double Stroke 1st Batch! #702025 Camera Body", price: 3166.08, location: "Indianapolis, IN", platform: "UPP", condition: "Excellent", link: "https://usedphotopro.com/leica-m3-ds-double-stroke-1st-batch-702025-camera-body-ulm-02-9890-3-702025-0d4af734" },
+  { name: "Leica M3 Single Stroke Preview Lever 35mm Rangefinder Camera Body, Chrome", price: 1334.00, location: "Smyrna, GA", platform: "KEH", condition: "Inoperative", link: "https://www.keh.com/shop/leica-m3-single-stroke-preview-lever-35mm-camera-body.html" },
+  { name: "Leica M3 Double Stroke Preview Lever 35mm Rangefinder Camera Body, Chrome", price: 1791.00, location: "Smyrna, GA", platform: "KEH", condition: "Excellent", link: "https://www.keh.com/shop/leica-m3-double-stroke-preview-lever-35mm-camera-body.html" },
+  { name: "Leica M3 Rangefinder Kit – Recently CLA'd – Leitz 50mm f/2.8 Elmar & Original Leather Case", price: 2400.00, location: "Thomasville, GA", platform: "Facebook", condition: "Full CLA recently", link: "https://www.facebook.com/share/1QegqJdQXK/" },
+  { name: "CLA'D Leica M3 DS", price: 1500.00, location: "Madison, WI", platform: "Facebook", condition: "Accurate shutter, replaced with Litchigrain Cowhide leather", link: "https://www.facebook.com/share/1E7nRGpJWr/" },
+  { name: "Leica M3 double stroke transitional", price: 1200.00, location: "Tipton, IA", platform: "Facebook", condition: "Viewfinder has some haze", link: "https://www.facebook.com/share/18QzArrWBY/" },
+  { name: "Leica M3 Double Stroke (BODY ONLY) film camera - PLEASE READ DESCRIPTION", price: 1300.00, location: "Riverside, MO", platform: "Facebook", condition: "Serviced by Ryan Jones recently", link: "https://www.facebook.com/share/14brANQRgwd/" },
+  { name: "Leica M3 camera s/n 833999 with Summicron 50mm f2 lens s/n 1351806.", price: 2200.00, location: "Lee's Summit, MO", platform: "Facebook", condition: "See listing", link: "https://www.facebook.com/share/1FddfSkPos/" },
+  { name: "For Sale: Mint Leica M3 Single-Stroke Rangefinder + Clean Summicron 50mm", price: 2360.00, location: "Naperville, IL", platform: "Facebook", condition: "No haze, fungus, or separation", link: "https://www.facebook.com/share/1cnHYt6RUG/" },
+  { name: "leica m3 double stroke DS", price: 1400.00, location: "Los Angeles, CA", platform: "Facebook", condition: "Speeds sound accurate", link: "https://www.facebook.com/share/18NLdd5ca3/" },
+  { name: "Leica M3 Double Stroke w/ 50mm Summicron f2", price: 2500.00, location: "Los Angeles, CA", platform: "Facebook", condition: "Purchased in 2024 from KEH", link: "https://www.facebook.com/share/1CXsUvMtEe/" },
+  { name: "Leica M3 single stroke film camera", price: 1200.00, location: "Emeryville, CA", platform: "Facebook", condition: "Good condition, minor scuffs on body, CLA'd 2024", link: "https://www.facebook.com/share/1J3mzAjXgX/" },
+  { name: "Leica M3 single stroke with collapsible Summicron lens.", price: 1600.00, location: "Seaside, CA", platform: "Facebook", condition: "Purchased from Japan, unknown if CLA'd", link: "https://www.facebook.com/share/18GYB9k1EU/" },
+  { name: "Leica M3 single stroke - just CLA'd", price: 1800.00, location: "Claremont, CA", platform: "Facebook", condition: "Just CLA'd", link: "https://www.facebook.com/share/1CKgFv7KJd/" },
+  { name: "Leica M3", price: 2000.00, location: "San Diego, CA", platform: "Facebook", condition: "See listing", link: "https://www.facebook.com/share/1B6Q1CdGyM/" },
+  { name: "1955 Leica M3 - Lucky 777", price: 1850.00, location: "Berkeley, CA", platform: "Facebook", condition: "CLA'd recently", link: "https://www.facebook.com/share/17tPQNKXSp/" },
+  { name: "Leica M3 with 5cm Summicron 3/2026 CLA", price: 2200.00, location: "Oakland, CA", platform: "Facebook", condition: "Just CLA'd by Youxin Ye last month", link: "https://www.facebook.com/share/18DgBTRqWC/" },
+  { name: "Camera: Leica M3 single stroke in perfect condition. All original e.g. Leitz/Wetzlar lense, etc.", price: 1200.00, location: "Silver Spring, MD", platform: "Facebook", condition: "See listing", link: "https://www.facebook.com/share/1LK8P4NA8j/" },
+  { name: "Leica M3 Double Stroke Late Model w/ Box", price: 2000.00, location: "Allston, MA", platform: "Facebook", condition: "Good cosmetics condition", link: "https://www.facebook.com/share/18KBcpMPh8/" },
+  { name: "Leica M3 Chrome Single Stroke Camera body", price: 1100.00, location: "New York, NY", platform: "Facebook", condition: "Needs CLA, 1/1000 shutter is not opening", link: "https://www.facebook.com/share/17Tvb7rpyf/" },
+  { name: "Leica m3 trades welcome for m2/m5", price: 1000.00, location: "Philadelphia, PA", platform: "Facebook", condition: "See listing", link: "https://www.facebook.com/share/1CTjeq6Coi/" },
+  { name: "Leica M3 SS, preview lever, Black Re-paint", price: 2400.00, location: "Warrenton, VA", platform: "Facebook", condition: "Shutter speeds accurate", link: "https://www.facebook.com/share/1GyrWGbSWX/" },
+  { name: "Leica M3 (1957) with Summicron 50mm F2", price: 2500.00, location: "Austin, TX", platform: "Facebook", condition: "Recently CLA'd", link: "https://www.facebook.com/share/1CbZftX5uc/" }
+];
+
+// ── STATE ──
+let activePlatform = 'All';
+let activeSort = 'price-asc';
+let searchQuery = '';
+let minPrice = null;
+let maxPrice = null;
+
+// ── INIT ──
+function init() {
+  buildStats();
+  buildPlatformPills();
+  bindEvents();
+  render();
+}
+
+// ── STATS ──
+function buildStats() {
+  const prices = LISTINGS.map(l => l.price);
+  const minP = Math.min(...prices);
+  const maxP = Math.max(...prices);
+  const avgP = prices.reduce((a,b) => a+b, 0) / prices.length;
+  const platforms = [...new Set(LISTINGS.map(l => l.platform))].length;
+
+  const stats = [
+    { value: LISTINGS.length, label: 'Total Listings' },
+    { value: '$' + minP.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 2}), label: 'Lowest Price' },
+    { value: '$' + Math.round(avgP).toLocaleString(), label: 'Avg Price' },
+    { value: '$' + maxP.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 2}), label: 'Highest Price' },
+    { value: platforms, label: 'Platforms' }
+  ];
+
+  document.getElementById('statsGrid').innerHTML = stats.map(s =>
+    `<div class="stat-card"><div class="stat-value">${s.value}</div><div class="stat-label">${s.label}</div></div>`
+  ).join('');
+}
+
+// ── PLATFORM PILLS ──
+function buildPlatformPills() {
+  const platforms = ['All', ...new Set(LISTINGS.map(l => l.platform))];
+  document.getElementById('platformPills').innerHTML = platforms.map(p =>
+    `<button class="pill ${p === 'All' ? 'active' : ''}" data-platform="${p}">${p}</button>`
+  ).join('');
+}
+
+// ── QUALITY SCORING ──
+function qualityScore(item) {
+  const c = (item.condition || '').toLowerCase();
+  const bad = ['inoperative','stuck','need cla','needs cla','not accurate','not opening','as-is','haze','wear'];
+  const good = ["cla'd","cla'ed","excellent","mint","perfect","accurate","working","clean","great","no haze","no fungus"];
+  let score = 0;
+  good.forEach(k => { if (c.includes(k)) score++; });
+  bad.forEach(k => { if (c.includes(k)) score--; });
+  return score;
+}
+
+function qualityLabel(item) {
+  const s = qualityScore(item);
+  if (s >= 2) return { label: 'Good condition', cls: 'dot-green' };
+  if (s >= 0) return { label: 'Fair condition', cls: 'dot-yellow' };
+  return { label: 'Issues noted', cls: 'dot-red' };
+}
+
+// ── EVENTS ──
+function bindEvents() {
+  document.getElementById('searchInput').addEventListener('input', e => {
+    searchQuery = e.target.value.toLowerCase();
+    render();
+  });
+
+  document.getElementById('minPrice').addEventListener('input', e => {
+    minPrice = e.target.value ? parseFloat(e.target.value) : null;
+    render();
+  });
+
+  document.getElementById('maxPrice').addEventListener('input', e => {
+    maxPrice = e.target.value ? parseFloat(e.target.value) : null;
+    render();
+  });
+
+  document.getElementById('platformPills').addEventListener('click', e => {
+    const pill = e.target.closest('.pill');
+    if (!pill) return;
+    activePlatform = pill.dataset.platform;
+    document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+    pill.classList.add('active');
+    render();
+  });
+
+  document.querySelectorAll('.sort-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      activeSort = btn.dataset.sort;
+      document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      render();
+    });
+  });
+
+  document.getElementById('resetBtn').addEventListener('click', () => {
+    searchQuery = '';
+    activePlatform = 'All';
+    activeSort = 'price-asc';
+    minPrice = null;
+    maxPrice = null;
+    document.getElementById('searchInput').value = '';
+    document.getElementById('minPrice').value = '';
+    document.getElementById('maxPrice').value = '';
+    document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+    document.querySelector('.pill[data-platform="All"]').classList.add('active');
+    document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector('.sort-btn[data-sort="price-asc"]').classList.add('active');
+    render();
+  });
+}
+
+// ── FILTER & SORT ──
+function getFiltered() {
+  let list = [...LISTINGS];
+
+  if (activePlatform !== 'All') {
+    list = list.filter(l => l.platform === activePlatform);
+  }
+  if (searchQuery) {
+    list = list.filter(l =>
+      l.name.toLowerCase().includes(searchQuery) ||
+      l.location.toLowerCase().includes(searchQuery) ||
+      l.condition.toLowerCase().includes(searchQuery)
+    );
+  }
+  if (minPrice !== null) list = list.filter(l => l.price >= minPrice);
+  if (maxPrice !== null) list = list.filter(l => l.price <= maxPrice);
+
+  list.sort((a, b) => {
+    if (activeSort === 'price-asc') return a.price - b.price;
+    if (activeSort === 'price-desc') return b.price - a.price;
+    if (activeSort === 'name-asc') return a.name.localeCompare(b.name);
+    return 0;
+  });
+
+  return list;
+}
+
+// ── RENDER ──
+function render() {
+  const filtered = getFiltered();
+  const lowestPrice = filtered.length ? Math.min(...filtered.map(l => l.price)) : null;
+
+  document.getElementById('headerCount').textContent = `${filtered.length} listing${filtered.length !== 1 ? 's' : ''}`;
+  document.getElementById('resultsInfo').innerHTML =
+    `Showing <strong>${filtered.length}</strong> of <strong>${LISTINGS.length}</strong> listings`;
+
+  const grid = document.getElementById('listingsGrid');
+
+  if (filtered.length === 0) {
+    grid.innerHTML = `
+      <div class="empty">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+        <p>No listings match your filters. Try adjusting your search.</p>
+      </div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map(item => {
+    const ql = qualityLabel(item);
+    const isDeal = item.price === lowestPrice;
+
+    return `
+      <div class="card ${isDeal ? 'deal-badge' : ''}">
+        <div class="card-top">
+          <div class="card-name">${escHtml(item.name)}</div>
+          <div class="card-price">$${item.price.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+        </div>
+        <div class="card-meta">
+          <span class="badge badge-platform">${escHtml(item.platform)}</span>
+          <span class="badge badge-location">📍 ${escHtml(item.location)}</span>
+        </div>
+        <div class="card-condition">
+          <div class="condition-label">Condition</div>
+          ${escHtml(item.condition)}
+        </div>
+        <div class="card-footer">
+          <div class="quality-dot">
+            <div class="dot ${ql.cls}"></div>
+            <span>${ql.label}</span>
+          </div>
+          <a class="btn-view" href="${item.link}" target="_blank" rel="noopener">
+            View
+            <svg viewBox="0 0 24 24"><path d="M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
+          </a>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function escHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+init();
+</script>
+</body>
+</html>
