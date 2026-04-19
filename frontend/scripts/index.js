@@ -37,8 +37,8 @@ window.addEventListener("load", async () => {
         data.shift();
         const toNum = (str) => parseFloat(str.replace(/[$,]/g, ""));
         data.sort((a, b) => toNum(a[1]) - toNum(b[1]));
-        const body = document.querySelector("body");
-        if (body)
-            data.forEach(row => body.appendChild(createCard(row)));
+        const grid = document.querySelector(".grid");
+        if (grid)
+            data.forEach(row => grid.appendChild(createCard(row)));
     });
 });
