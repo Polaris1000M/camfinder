@@ -1,11 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
 
-interface WaitlistEntry {
-  email: string;
-  name: string;
-  interest: string;
-}
-
 interface Listing {
   name: string;
   price: number;
@@ -61,6 +55,15 @@ const LISTINGS: Listing[] = [
   { name: "Leica M3 (1957) with Summicron 50mm F2", price: 2500.00, location: "Austin, TX", platform: "Facebook", condition: "Recently CLA'd", link: "https://www.facebook.com/share/1CbZftX5uc/" }
 ];
 
+const WEB3FORMS_ACCESS_KEY = "1a691e9b-fefc-4c31-842d-291232c6875a";
+
+const WAITLIST_INTEREST_LABELS: Record<string, string> = {
+  budget: "Budget cameras (under $1500)",
+  premium: "Premium cameras (over $1500)",
+  deals: "Best deals",
+  all: "All listings",
+};
+
 function qualityScore(condition: string): number {
   const c = (condition || "").toLowerCase();
   const bad = ["inoperative", "stuck", "need cla", "needs cla", "not accurate", "not opening", "as-is", "haze", "wear"];
@@ -89,6 +92,8 @@ export default function Home() {
   const [waitlistName, setWaitlistName] = useState("");
   const [waitlistInterest, setWaitlistInterest] = useState("");
   const [waitlistSubmitted, setWaitlistSubmitted] = useState(false);
+  const [waitlistSubmitting, setWaitlistSubmitting] = useState(false);
+  const [waitlistError, setWaitlistError] = useState<string | null>(null);
   const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
   const platforms = useMemo(() => ["All", ...Array.from(new Set(LISTINGS.map(l => l.platform)))], []);
@@ -159,14 +164,44 @@ export default function Home() {
     return () => clearInterval(interval);
   }, []);
 
-  const handleWaitlistSubmit = (e: React.FormEvent) => {
+  const handleWaitlistSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (waitlistEmail && waitlistName && waitlistInterest) {
-      setWaitlistSubmitted(true);
-      setWaitlistEmail("");
-      setWaitlistName("");
-      setWaitlistInterest("");
-      setTimeout(() => setWaitlistSubmitted(false), 5000);
+    if (!waitlistEmail || !waitlistName || !waitlistInterest) return;
+
+    setWaitlistSubmitting(true);
+    setWaitlistError(null);
+
+    const interestLabel = WAITLIST_INTEREST_LABELS[waitlistInterest] ?? waitlistInterest;
+    const message = `CamFinder waitlist signup\nInterest: ${interestLabel}`;
+
+    try {
+      const res = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          access_key: WEB3FORMS_ACCESS_KEY,
+          name: waitlistName,
+          email: waitlistEmail,
+          message,
+        }),
+      });
+      const data = (await res.json()) as { success?: boolean; message?: string };
+      if (data.success) {
+        setWaitlistSubmitted(true);
+        setWaitlistEmail("");
+        setWaitlistName("");
+        setWaitlistInterest("");
+        setTimeout(() => setWaitlistSubmitted(false), 5000);
+      } else {
+        setWaitlistError(data.message ?? "Something went wrong. Please try again.");
+      }
+    } catch {
+      setWaitlistError("Network error. Please try again.");
+    } finally {
+      setWaitlistSubmitting(false);
     }
   };
 
@@ -284,6 +319,8 @@ export default function Home() {
         .submit-button { background: var(--accent); color: white; padding: 12px 16px; border-radius: var(--radius-sm); border: none; font-weight: 700; cursor: pointer; font-size: 0.9rem; transition: all 0.2s ease; }
         .submit-button:hover { background: var(--accent-hover); transform: translateY(-2px); box-shadow: var(--shadow-md); }
         .success-message { background: #e8f5e9; border: 1px solid #4caf50; color: #2e7d32; padding: 12px 16px; border-radius: var(--radius-sm); margin-bottom: 16px; font-size: 0.9rem; }
+        .error-message { background: #ffebee; border: 1px solid var(--danger); color: #c62828; padding: 12px 16px; border-radius: var(--radius-sm); margin-bottom: 16px; font-size: 0.9rem; }
+        .submit-button:disabled { opacity: 0.65; cursor: not-allowed; transform: none; }
         @media (max-width: 768px) {
           .header-inner { padding: 0 16px; gap: 8px; flex-wrap: wrap; }
           .logo-text { font-size: 1rem; }
@@ -507,6 +544,9 @@ export default function Home() {
             {waitlistSubmitted && (
               <div className="success-message">✓ Thanks for joining! We'll notify you soon.</div>
             )}
+            {waitlistError && (
+              <div className="error-message">{waitlistError}</div>
+            )}
 
             <form className="waitlist-form" onSubmit={handleWaitlistSubmit}>
               <div className="form-group">
@@ -552,7 +592,9 @@ export default function Home() {
                 </select>
               </div>
 
-              <button type="submit" className="submit-button">Join the Waitlist</button>
+              <button type="submit" className="submit-button" disabled={waitlistSubmitting}>
+                {waitlistSubmitting ? "Sending…" : "Join the Waitlist"}
+              </button>
             </form>
           </div>
         </div>
